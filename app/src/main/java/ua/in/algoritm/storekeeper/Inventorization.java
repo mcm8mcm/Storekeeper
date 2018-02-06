@@ -1,6 +1,7 @@
 package ua.in.algoritm.storekeeper;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -18,7 +19,7 @@ public class Inventorization {
 
         public DocLine(Commodity Stc){
             setCommodity(Stc);
-            this.Qty = 1.0;
+            this.Qty = 0.0;
         }
 
         public int getLineNum(){
@@ -27,6 +28,14 @@ public class Inventorization {
 
         public void setLineNum(int LineNum){
             this.LineNum = LineNum;
+        }
+
+        public double getQty(){
+            return this.Qty;
+        }
+
+        public void setQty(double Qty){
+            this.Qty = Qty;
         }
 
         public void setCommodity(Commodity Stc){
@@ -44,9 +53,18 @@ public class Inventorization {
     private ArrayList<DocLine> Lines = null;
 
     public void addLine(Commodity Stc, CommodityUnit Unit, double Qty){
-        if(FindLine(Stc) == 0){
-
+        DocLine Line = null;
+        int Index = FindLine(Stc);
+        if(Index == 0){
+            Line = new DocLine(Stc);
+            Line.setLineNum(Index + 1);
+            Lines.add(Line);
+        }else{
+            Line = Lines.get(Index);
         }
+
+        Line.setQty(Line.getQty() + Qty);
+        Lines.set(Index, Line);//Maybe, it is redundant expression
     }
 
     private void Renum(){
@@ -59,10 +77,60 @@ public class Inventorization {
     private int FindLine(Commodity Stc){
         for (DocLine Line: Lines) {
             if(Line.Stc.equals(Stc)){
-                return Line.getLineNum();
+                return Line.getLineNum() - 1;
             }
         }
 
         return 0;
+    }
+
+    public void delLine(int Index){
+        if(Lines.isEmpty()){
+            return;
+        }
+
+        if(Index >= Lines.size()){
+            return;//Index too big
+        }
+
+        Lines.remove(Index);
+        Renum();
+    }
+
+    public ArrayList<DocLine> getLines(){
+        return Lines;
+    }
+
+    public String getComment(){
+        return Comment;
+    }
+
+    public void setComment(String Comment){
+        this.Comment = Comment;
+    }
+
+    public void setQty(int Index, double Qty){
+        if(Index >= Lines.size()){
+            return;//It's a mistake
+        }
+
+        if(Qty == 0){
+            delLine(Index);
+            return;
+        }
+
+        Lines.get(Index).Qty = Qty;
+    }
+
+    public int getLinesCount(){
+        return Lines.size();
+    }
+
+    public void newDoc(int ID){
+        Lines = new ArrayList<DocLine>();
+        DocNum = "";
+        DocDate = Calendar.getInstance().getTime();
+        Comment = "";
+        this.ID = ID;
     }
 }

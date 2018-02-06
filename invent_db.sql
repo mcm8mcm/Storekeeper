@@ -1,5 +1,5 @@
 --
--- Файл сгенерирован с помощью SQLiteStudio v3.1.1 в Сб фев 3 22:19:53 2018
+-- Файл сгенерирован с помощью SQLiteStudio v3.1.1 в Вт фев 6 23:21:02 2018
 --
 -- Использованная кодировка текста: UTF-8
 --
@@ -48,12 +48,16 @@ CREATE TABLE goods_units (
                                 NOT NULL,
     obj_id      INTEGER         NOT NULL
                                 REFERENCES Goods (id),
+    outer_id    STRING (36)     NOT NULL
+                                UNIQUE,
     unit_name   CHAR (15)       NOT NULL ON CONFLICT REPLACE
                                 DEFAULT ('шт.'),
     weight      DECIMAL (12, 3) NOT NULL
                                 DEFAULT (0),
     coefficient DECIMAL (12, 3) NOT NULL ON CONFLICT REPLACE
-                                DEFAULT (1) 
+                                DEFAULT (1),
+    is_default  BOOLEAN         NOT NULL ON CONFLICT REPLACE
+                                DEFAULT (0) 
 );
 
 
@@ -88,7 +92,7 @@ CREATE TABLE journal (
     id       INTEGER    PRIMARY KEY AUTOINCREMENT
                         UNIQUE
                         NOT NULL,
-    doc_type CHAR       NOT NULL,
+    doc_type CHAR (1)   NOT NULL,
     doc_date DATETIME   NOT NULL
                         DEFAULT (datetime('now', 'localtime') ),
     doc_num  CHAR (10)  NOT NULL,
@@ -109,9 +113,15 @@ CREATE TABLE options (
     sort_order INTEGER    NOT NULL ON CONFLICT REPLACE
                           DEFAULT (0),
     value      CHAR (128) NOT NULL ON CONFLICT REPLACE
+                          DEFAULT (''),
+    [desc]     CHAR (128) NOT NULL ON CONFLICT REPLACE
                           DEFAULT ('') 
 );
 
+INSERT INTO options (id, key_name, role, sort_order, value, "desc") VALUES (1, 'gkt_name', 'goods_index', 3, 'C', 'По наименованию');
+INSERT INTO options (id, key_name, role, sort_order, value, "desc") VALUES (2, 'gkt_code', 'goods_index', 2, 'B', 'По коду');
+INSERT INTO options (id, key_name, role, sort_order, value, "desc") VALUES (3, 'gkt_barcore', 'goods_index', 1, 'A', 'По штрих-коду');
+INSERT INTO options (id, key_name, role, sort_order, value, "desc") VALUES (4, 'dt_invent', 'doc_type', 1, 'A', 'Инвентаризация');
 
 -- Индекс: idx_gindex_float
 DROP INDEX IF EXISTS idx_gindex_float;
